@@ -1,0 +1,76 @@
+nivaqi — authors and copyright holders
+======================================
+
+nivaqi (நிவதி) is authored by two people. This file says who, so that "who
+wrote this" has a single answer rather than several.
+
+  Isha Maruff <isha@etamil.in>
+      Author and copyright holder, 2026-present.
+
+      Two addresses, and each is used where it does its job:
+
+        **isha@etamil.in** is the contact and copyright address. It is the
+        one in this file, in the source headers and in the documentation.
+
+        **icykki26@gmail.com** is the address on the GitHub account the
+        nivaqi repositories live under, so it is the address on the commits.
+        GitHub links a commit to an account by matching the author's email,
+        and the account's own address needs nothing verified to match.
+
+      One person. If the contact address is ever added and verified on that
+      account, the commits can move to it and this paragraph can go.
+
+  Esan Maruff <esan@etamil.in>
+      Author and copyright holder, 2026-present.
+
+      One person, two names, each used where it does its job:
+
+        **Esan Maruff** is the name on GitHub (@Maruff), on every other
+        account, on etamil.in and throughout the commit history. It is what a
+        reader sees and what he prefers to be addressed as.
+
+        **Mohammed Maruff** is the legal name and the name on the published
+        research. In eTamil, copyright is asserted in it. nivaqi's source
+        headers name both authors in the short form; if a legal name is ever
+        needed in the headers, change it there and here together.
+
+
+COPYRIGHT NOTICE
+
+Every nivaqi source file carries:
+
+    // SPDX-License-Identifier: AGPL-3.0-or-later
+    // Copyright (C) 2026 Isha Maruff and Esan Maruff
+
+
+LICENCE
+
+AGPL-3.0-or-later. See LICENSE.
+
+nivaqi imports nUlakam, the eTamil standard library, which is AGPL-3.0-or-later
+in Maruff/eTamil_lang. All nivaqi repositories are public, so the licences are
+consistent and nothing turns on the boundary between them.
+
+See docs/DECISIONS/0008-repositories-and-licence.md for the one licensing
+question that is still open — it concerns the separate private products (AI, BI
+and the Customizing Studio), not this repository.
+
+
+CONTRIBUTIONS
+
+None yet. Contributors will be added here as they arrive.
+
+Copyright is not assigned to the project. A contributor keeps copyright in what
+they wrote and licenses it under AGPL-3.0-or-later. That means this file stops
+being a list of two people and becomes the list of everyone the licence has to
+be honoured towards.
+
+Before accepting a first external contribution, read
+docs/DECISIONS/0008-repositories-and-licence.md: whether a contributor licence
+agreement is wanted is a decision with a closing window, not an open one.
+
+
+GIT COMMIT AUTHORSHIP
+
+Separate from this file, and the owner's to configure. Nothing in this
+repository changes it.

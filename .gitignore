@@ -1,0 +1,26 @@
+# Environment and secrets — never committed
+.env
+.env.*
+!.env.example
+
+# Databases produced by running or testing
+*.db
+*.db-journal
+*.db-wal
+*.sqlite
+
+# The React application
+mukappu/node_modules/
+mukappu/dist/
+mukappu/.vite/
+
+# Filled documents and generated PDFs
+viLYvu/
+*.pdf
+!docs/**/*.pdf
+
+# Editor and OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
