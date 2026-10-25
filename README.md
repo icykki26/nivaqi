@@ -59,7 +59,8 @@ nivaqi.
 | Business rules | **eTamil**, in `nUlakam` |
 | Routes, persistence, orchestration | **eTamil**, here |
 | Interface | React + Vite + TypeScript, presentation only |
-| Database | PostgreSQL, money as native `NUMERIC` |
+| Database | PostgreSQL in the cloud; SQLite on the edge and in the PoS |
+| Backend language | **eTamil only** — no other ([decision 0014](docs/DECISIONS/0014-databases-and-language.md)) |
 | Point of sale | A separate eTamil process on Android, offline-first, over local SQLite |
 
 ## Licence and authorship

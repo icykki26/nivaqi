@@ -1,6 +1,8 @@
 # 0006 — Multi-tenancy
 
-**Status:** accepted, 2026-10-24 — **with one reading to confirm.**
+**Status:** superseded by [0011](0011-saas-architecture.md), 2026-10-26.
+The reading below was settled: the owner intends a SaaS *product*. The text
+that follows is kept as it was written.
 
 ## Context
 
@@ -30,6 +32,8 @@ Deferred, because it is a product and four pilots do not need it:
 - Written isolation guarantees of the kind a paying tenant expects.
 
 ## The reading to confirm
+
+*Resolved 2026-10-26: the second reading. See 0011.*
 
 "Multi-tenant SaaS — accepted" is recorded here as *multi-tenant data model
 now, SaaS product surface later*. The alternative reading is *build the SaaS

@@ -63,6 +63,32 @@ own central claim.
 | A CMS | Decision 4. A blog has no business rule, so it can contribute nothing to `nUlakam` |
 | A filing agent | Decision 2. nivaqi computes GST and TDS and exports the figures. It does not file returns |
 
+### Product principles
+
+*Modular like Odoo, simple like Sage 50.* Full reasoning, and what was
+rejected, is in [decision 0012](DECISIONS/0012-product-principles.md). It is
+read as simplicity in what a customer sees and configures; the module scope is
+unchanged.
+
+1. **Accounting is the spine.** Every module posts through the ledger, and
+   accounting is reachable from every section of the home page.
+2. **Screens are named for tasks**, not tables. A module is a section of the
+   home page; a module the company has not bought is absent from it.
+3. **Few settings, strong defaults, one way to do each job.** Each module's
+   `README.md` lists its settings. Templates per business type carry the
+   defaults. No workflow editor in core; customisation is the private Studio.
+4. **Guided setup** from sign-up to a first invoice.
+5. **No platform vocabulary reaches the customer.** A company, never a tenant,
+   pool or silo.
+
+**Proposed targets — proposals, not decisions, and none measured:** first
+invoice within 10 minutes of sign-up; at most 10 settings visible by default
+per module; at most 7 home-page sections.
+
+The consequence to plan for: the first pilot, the IT consulting MNC, is the
+least Sage-50-like. Build the shell and setup wizard as a small-business
+experience first and treat the MNC's depth as an entitlement.
+
 ---
 
 ## 2. The four pilots
@@ -97,8 +123,8 @@ same order.
    have: batch/expiry with FEFO, weight-based units, and manufacturing.
    Section 8 places them.
 3. **Four unrelated legal entities on one system is multi-tenancy**, not
-   multi-company. See decision 6 and section 6.7 — this is the one decision
-   whose reading I want confirmed.
+   multi-company, and the owner intends a SaaS product. See
+   [decision 0011](DECISIONS/0011-saas-architecture.md) and section 6.7.
 
 ### A warning about running four at once
 
@@ -259,10 +285,12 @@ is eighteen library families rather than one.
 | Gap | Consequence | Mitigation |
 |---|---|---|
 | **No module namespaces, and nothing can be private.** Every helper is part of the public surface, and two modules defining one name is a hard load failure | The biggest scaling risk. Fourteen modules over a flat namespace, against 153 existing library modules, will collide repeatedly, and the failure arrives at load time far from the cause | Naming convention (section 8.1), `check_names.py` in CI from day one, and a language proposal for `இறக்கு "…" ஆக ச`. **Raise before wave 2** |
-| **One database connection at a time**; `தளம்_வினா` names no handle | Rules out database-per-tenant, and rules out reading a replica in the same process | Shared schema with a tenant column (section 6.7). If decision 6 means full SaaS, this becomes a language request |
+| **One database connection at a time**; `தளம்_வினா` names no handle | Rules out database-per-tenant, and rules out reading a replica in the same process | Shared schema with a tenant column, and one process per database for the customers who need their own (section 6.7). No longer a blocker (decision 0011) |
 | **No language-level transaction construct** | `BEGIN`/`COMMIT` as plain SQL. Correct, but a handler returning early between them leaks an open transaction | `atiqqaLam/qaLap_parivarqqaZY.qmz` — one kernel wrapper, the only place in nivaqi that writes those words |
 | **No static file serving** | The React build cannot be served by the eTamil process | nginx or Caddy in front, serving `/` and proxying `/api`. The right production shape anyway |
 | **No SMTP** | Invoice email, portal invitations, password resets, overdue notices | A mail provider's REST API through `வலை_பதி`, routed via the outbox so a failed send is retried, not lost. No host primitive needed |
+| **No updater** on a customer-hosted instance | Version skew, migrations on machines nobody can reach, sync-protocol compatibility | An updater with staged rollout, and schema and protocol versioning. Not designed or estimated (decision 0013) |
+| **Local disk only** for attachments and generated documents | Fails on two or more nodes, which SaaS needs | Shared object storage with an S3-style client. The HMAC signing primitive exists in the host; the client does not. It is written in eTamil (decision 0014); the design is open |
 | **Startup ≈ 1 s** with a large import set, and nivaqi's will be larger | Rules out any per-request process — already the chosen shape — but CI pays it per test file | Long-running server; group `cOqaZY` assertions per file |
 | **No argv, no `--quiet`** | Admin and migration scripts take input through the environment | Acceptable. Worth raising |
 | **LLVM backend refuses I/O statements** | nivaqi runs on the VM; no AOT-compiled deployment | Not a blocker. Noted so nobody plans a performance win around it |
@@ -307,6 +335,14 @@ acquires a report becomes a column in the next migration.
 | 3 — Application | **eTamil** (`nivaqi`) | Routes, persistence mapping, orchestration, response shaping |
 | 4 — Interface | TypeScript / React | Presentation only. No rules |
 
+**The backend is eTamil only** (decision 0014): every server-side and
+operational program nivaqi authors, including migrations, seeds, sync, the
+tenant export tool and the tests. The React front end and infrastructure
+products such as PostgreSQL, PgBouncer and a reverse proxy are outside the
+rule. When eTamil cannot do something, the answer is a change to eTamil in
+`eTamil_lang`, not a script in another language. The databases are SQLite on
+the edge and PostgreSQL in the cloud.
+
 The applied test transfers from `eTamil_lang/docs/ARCHITECTURE.md`: rounding
 went into the host because it needs the decimal representation; Indian digit
 grouping stayed in eTamil because string manipulation is expressible. For
@@ -336,7 +372,7 @@ nivaqi/
     uqavi/                   runnable worked examples
   mukappu/                   the React application
   itam/                      migrations, as numbered SQL
-  karuvi/                    scripts: migrate, seed, check, release
+  karuvi/                    eTamil programs: migrate, seed, export, check
   .github/workflows/
 ```
 
@@ -380,9 +416,13 @@ The middle path is **thin, explicit and boring**:
 
 Roughly 1,300–1,700 library lines. Everything else sits on it.
 
+**The kernel assumes no always-on cloud** (decision 0013). Nothing in it may
+need a connection to a cloud service to complete a request; anything that
+must reach the cloud goes through the outbox.
+
 ### 6.4 The data model rules
 
-Eight rules, each cheap now and very expensive to retrofit.
+Nine rules, each cheap now and very expensive to retrofit.
 
 1. **The ledger is the single source of truth for money.** Every module that
    moves value posts a balanced journal entry through `kaNakkiyal/pErEtu`. No
@@ -404,6 +444,12 @@ Eight rules, each cheap now and very expensive to retrofit.
 6. **Money is `NUMERIC` in PostgreSQL**, never `REAL`, never a float anywhere
    on the path. Under SQLite it crosses as text, which round-trips losslessly.
    This is already how the drivers behave; the rule is not to defeat it.
+   **Aggregation is the exception:** summing a text money column in SQLite
+   returns a float, which differed from the exact decimal sum in a test
+   (decision 0013). Sum money in integer paise or in eTamil on any engine
+   on the edge. SQLite is the edge database
+   (decision 0014), so the money representation must be decided before the
+   first schema (decision 0013); this rule is not changed until then.
 7. **Document state is data, not code.** Use `qittam/nilYmARRam` — a lifecycle
    as a transition table — for draft → confirmed → done → cancelled on every
    document type. Transitions are then inspectable, testable and renderable,
@@ -412,6 +458,13 @@ Eight rules, each cheap now and very expensive to retrofit.
    sells by weight and buys by sack; the bakery issues by gram and counts by
    tray. A quantity without a unit is a defect waiting for the first
    conversion.
+9. **Identifiers are globally unique.** UUIDv7 primary keys, or composite
+   `(tenant, id)` keys. A row must be able to move between the pooled tier,
+   a silo and a restored copy without its identifier colliding with another
+   row's. Per-database serials would make tenant restore, merge and the move
+   to a silo painful. Decide this before any schema exists. How UUIDv7 is
+   generated (a database default, or the host) is unverified and is an M0
+   spike item.
 
 ### 6.5 The HTTP API contract
 
@@ -443,37 +496,51 @@ application.
   of its own, and in this product it would be an embarrassing one to postpone.
 - **The PoS is not this application.** See 7.3.
 
-### 6.7 Tenants and companies
+### 6.7 Tenants, companies and the SaaS shape
 
-**Multi-company from day one** — every table carries a company column, every
-query is scoped by the kernel, and `kaNakkiyal/niRuvaZam` already handles
-entities, base currency and conversion. Consolidation is a reporting concern on
-top, not a second database.
+Decided in [0011](DECISIONS/0011-saas-architecture.md), which supersedes 0006.
+The reasoning, the options not taken, and the backup design are there; this is
+the summary a developer needs.
 
-**Multi-tenant: the data model, now; the SaaS product, later.** Decision 6 was
-accepted, and section 2 forces it anyway — four unrelated legal entities on one
-system is tenancy, not companies. So:
+**Multi-company** — every table carries a company column, every query is scoped
+by the kernel, and `kaNakkiyal/niRuvaZam` already handles entities, base
+currency and conversion. Consolidation is a reporting concern on top, not a
+second database.
 
-- Every row carries a tenant as well as a company, written by the kernel.
-- No query reaches the database except through `vatikattal`, so the tenant
-  predicate is applied in one place and cannot be forgotten.
+**Multi-tenant SaaS** — a modular monolith: one codebase, one shared schema,
+modules sold as entitlements, deployables split by load profile, and a separate
+database only for customers who need one.
+
+- Every row carries a tenant as well as a company, written by the kernel. No
+  query reaches the database except through `vatikattal`, so the tenant
+  predicate is applied in one place. PostgreSQL row-level security is a second
+  lock, set with `SET LOCAL` inside `qaLap_parivarqqaZY`.
+- **Modules are entitlements.** A control-plane table maps tenant → plan →
+  modules, enforced once in `aZumaqi` at route entry. A switched-off module
+  keeps its data.
+- **Pools split by load profile, not popularity.** A pool is an entry file that
+  imports a subset of route files (`etamil --server pool_core.qmz`), on the same
+  binary and database. Candidates: core, PoS sync, reports (pointed at a read
+  replica) and jobs. Do not build pools speculatively; start with one.
+- **Silos on request.** One process is one database, so a customer who needs
+  isolation gets a database and a small process group of its own. Keep them
+  few: migrations run per database.
+- **Three placements** — cloud pool, cloud silo and **edge**, where the
+  authority runs on the customer's premises and the cloud is used for
+  backup, updates and optional sync. Same code, one authority per company,
+  no multi-master merge (decision 0013).
 - No cross-tenant sequences, and no process-wide cache keyed without a tenant.
+- **No platform vocabulary reaches the customer** (section 1, product
+  principles): a company, never a tenant, pool or silo.
 
-What is **deferred** is the SaaS product surface: self-service provisioning,
-per-tenant branding, subscription billing and the isolation guarantees a paying
-tenant would expect in writing. Those are a product, and they are not needed to
-run four pilots.
+**Backup** has two parts: platform-wide point-in-time recovery, and a
+tenant-scoped export tool for restoring one customer. A tenant is restored into
+a side copy by default, because statutory documents have already left the
+system. See 0011.
 
-> **One reading to confirm.** "Multi-tenant SaaS — accepted" is recorded above
-> as *multi-tenant data model now, SaaS product surface later*. If it meant
-> "build the SaaS product", the kernel grows provisioning and billing and wave
-> 1 is longer. [DECISIONS/0006](DECISIONS/0006-multi-tenancy.md) records both
-> readings; correcting it costs nothing today and a migration later.
-
-One constraint to carry: eTamil holds one database connection at a time and
-cannot name a handle, so database-per-tenant is not expressible today. If
-tenant isolation ever has to be physical, that is a language request, and it
-wants filing early.
+**Not yet measured:** throughput per core with PostgreSQL, memory under load
+with the full import set, and row-level security through the eTamil driver. No
+customer-count claim is made until they are.
 
 ### 6.8 Identity, roles and record rules
 
@@ -628,7 +695,8 @@ collision, names are governed from the first function:
   documented as private by convention. The language cannot enforce it; review
   can.
 - **`scripts/check_names.py` runs in CI** on every library PR, against every
-  name already in `nUlakam`.
+  name already in `nUlakam`. It is a Python tool in `eTamil_lang`; whether the
+  eTamil-only rule extends to development tooling is open (decision 0014).
 - **No name may be a hard-reserved word** (section 4.4). Financial keywords are
   free — `தொகை` is a good name for an amount.
 
@@ -745,6 +813,12 @@ One developer with AI assistance, eTamil and `nUlakam` as they stand, and
 | **5** | M9 HR & payroll 8–10 · M10 portals 8–10 · M11 eCommerce 6–8 · M12 website 2–3 | **24–31** |
 | | **Total** | **92–118** |
 
+**These totals exclude the SaaS control plane** (decision 0011): tenant
+registry, entitlements, provisioning and metering, with billing through a
+payment provider. My estimate is 4–6 weeks for a minimal version on top of
+wave 1. That is a guess, not a measurement, and it moves the first go-live
+by about the same amount.
+
 Roughly two to two and a half years for one developer — longer than the first
 estimate, because the four pilots added weight units, batch and expiry,
 manufacturing and restaurant PoS, none of which was in the original module
@@ -771,6 +845,10 @@ before wave 1 continues — one module to migrate rather than four.
 | **Compliance changes mid-build** | High | Medium | Rates in effective-dated tables (`vari_vikiqam` already works this way; **no rate is seeded**), never in code |
 | **Two-repository friction** | Medium | Medium | Section 3.3's policy, and `ETAMIL_PATH` for the inner loop |
 | **The front end accumulates rules** | High | Medium | Review rule: any calculation in TypeScript is a defect |
+| **A fleet of customer-hosted edge instances** — no updater, no way to reach the machines | High | High | Updater, staged rollout and versioned schema and sync protocol before the first edge customer (decision 0013) |
+| **A customer's edge device dies** and the off-site backup is stale | Medium | High | Encrypted off-site backup, restored on a schedule in testing; backup is part of the product, not an add-on (decision 0013) |
+| **Noisy neighbours in the shared pool** | Medium | Medium | Per-tenant rate limits at the edge, statement timeouts, jobs and reports in their own pools, and a silo for anyone who needs isolation (decision 0011) |
+| **Restoring a tenant breaks statutory records** — IRNs, e-way bills and payments have already left the system | Medium | High | Restore into a side copy by default; overwrite only with the tenant frozen, then reconcile against the outbox (decision 0011) |
 | **Single developer** | — | High | The documentation standard *is* the mitigation. That is why section 11 is not optional |
 
 ---
@@ -787,11 +865,19 @@ individually in [DECISIONS/](DECISIONS/):
 | [0003](DECISIONS/0003-sales-and-purchase.md) | Sales & Purchase is a first-class module |
 | [0004](DECISIONS/0004-website-and-blog.md) | No CMS in eTamil; static site plus a React storefront |
 | [0005](DECISIONS/0005-pos-offline-first.md) | PoS is offline-first, eTamil on Android |
-| [0006](DECISIONS/0006-multi-tenancy.md) | Multi-tenant data model now; SaaS product surface later |
+| [0006](DECISIONS/0006-multi-tenancy.md) | Multi-tenant data model now; SaaS product surface later — **superseded by 0011** |
 | [0007](DECISIONS/0007-pilots.md) | Four pilots, staggered, MNC first |
 | [0008](DECISIONS/0008-repositories-and-licence.md) | All nivaqi repositories public; AI, BI and Studio private |
 | [0009](DECISIONS/0009-where-this-document-lives.md) | This document lives here |
 | [0010](DECISIONS/0010-authorship.md) | Authored as Isha Maruff and Esan Maruff |
+
+Decisions taken after the founding ten:
+[0011](DECISIONS/0011-saas-architecture.md), the SaaS architecture and backup
+(section 6.7); [0012](DECISIONS/0012-product-principles.md), product
+principles (section 1); [0013](DECISIONS/0013-edge-placement.md), the
+edge placement and local-first with a single authority (sections 6.3 and
+6.7); and [0014](DECISIONS/0014-databases-and-language.md), the databases by
+placement and eTamil as the only backend language (section 6.1).
 
 ### Licence
 
@@ -834,8 +920,20 @@ nothing in this repository changes it.
 
 ## 15. Where to start
 
-1. **Run the performance spike** (risks, row 4). A day. It is the only thing
-   that could invalidate the architecture, and it is cheap to find out now.
+1. **Run the performance spike** (risks, row 4). A few days. It is the only
+   thing that could invalidate the architecture, and it is cheap to find out
+   now. Decision 0011 adds to it: requests per second per core with
+   PostgreSQL under a real handler; memory under load with the full import
+   set; row-level security through the driver with `SET LOCAL` under
+   PgBouncer transaction pooling; how UUIDv7 is generated; and whether
+   bulk copy is available for the tenant export tool. Decision 0013 adds two
+   more: whether `SUM` over a money column through eTamil's driver and its
+   bundled SQLite is exact (a Python test showed a float that differed from
+   the exact decimal sum in 44 of 1,500 small-ledger trials), and what
+   happens with several terminals writing to one SQLite file through one
+   eTamil process. Decision 0014 adds two more: how fast the tenant export
+   runs when written in eTamil, and whether eTamil can generate UUIDv7 (it has
+   a seconds clock, and no general UUID or random builtin was found).
 2. **Confirm the four pilots' real requirements** (section 2). A conversation
    each. The table is inferred and some of it will be wrong.
 3. Set up CI, migrations, the React shell and deployment. Deploy an empty
