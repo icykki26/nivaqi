@@ -88,11 +88,22 @@
     திரும்பு வரிசையாக்கு(விடை_);
 }
 
-// __உரை_படி(பாதை_) — the whole file as text.__
-// உரை_படி(பாதை_) — கோப்பு முழுவதும் உரையாக
+// __வரி_முடிவு_சீராக்கு(உரை_) — Windows line endings made into plain ones.__
+//
+// __Git on Windows checks files out with CRLF, and CR LF is a single written letter,__
+// __so splitting on "\n" never matches inside it: a CRLF file read as one long line,__
+// __every count came out 0 or 1, and two unequal documents looked alike. So the text__
+// __is made LF before anything splits it.__
+// வரி_முடிவு_சீராக்கு(உரை_) — விண்டோஸ் வரி முடிவுகளைச் சாதாரண வரி முடிவுகளாக்கும்
+செயல் வரி_முடிவு_சீராக்கு(உரை_) {
+    திரும்பு மாற்று(உரை_, "\r\n", "\n");
+}
+
+// __உரை_படி(பாதை_) — the whole file as text, with plain line endings.__
+// உரை_படி(பாதை_) — கோப்பு முழுவதும் உரையாக, சாதாரண வரி முடிவுகளுடன்
 செயல் உரை_படி(பாதை_) {
     கோப்பு_படி பாதை_, உள்ளடக்கம்_;
-    திரும்பு உள்ளடக்கம்_;
+    திரும்பு வரி_முடிவு_சீராக்கு(உள்ளடக்கம்_);
 }
 
 // __அமைப்பு_எண்ணிக்கை(உரை_) — [headings, table rows, code fences].__

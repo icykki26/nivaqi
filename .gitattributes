@@ -1,0 +1,4 @@
+# The test fixtures are byte-exact. One of them has Windows line endings on purpose
+# (karuvi/fixtures/qamiz_iNY/crlf_structure), and git must not convert it, or the
+# test that needs it would pass without testing anything.
+karuvi/fixtures/** -text

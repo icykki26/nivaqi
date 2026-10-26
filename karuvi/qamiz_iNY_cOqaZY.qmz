@@ -33,6 +33,13 @@
               "headings, table rows, fences: a # inside a fence is not counted");
 ஓட்டம் = சமம்(ஓட்டம், அமைப்பு_எண்ணிக்கை(""), [0, 0, 0], "an empty file has no structure");
 
+// __--- line endings ---------------------------------------------------------------__
+
+ஓட்டம் = சமம்(ஓட்டம், வரி_முடிவு_சீராக்கு("a\r\nb\r\n"), "a\nb\n", "CRLF becomes LF");
+ஓட்டம் = சமம்(ஓட்டம், வரி_முடிவு_சீராக்கு("a\nb\n"), "a\nb\n", "LF text is left alone");
+ஓட்டம் = சமம்(ஓட்டம், அமைப்பு_எண்ணிக்கை(வரி_முடிவு_சீராக்கு("# a\r\n## b\r\n```\r\n# c\r\n```\r\n| x |\r\n")),
+              [2, 1, 2], "structure of CRLF text, once normalised");
+
 // __--- counting Tamil words ----------------------------------------------------__
 
 ஓட்டம் = சமம்(ஓட்டம், தமிழ்ச்_சொற்கள்("இது ஒரு test of தமிழ்"), 3, "words that begin with a Tamil letter");
@@ -81,6 +88,17 @@
 குறை_ = இணை_சிக்கல்கள்(மாதிரி("not_tamil"));
 ஓட்டம் = சமம்(ஓட்டம், நீளம்(குறை_), 1, "not_tamil: one problem");
 ஓட்டம் = உறுதிசெய்(ஓட்டம், குறை_உள்ளதா(குறை_, "Tamil words"), "not_tamil: says there are too few Tamil words");
+
+// __--- Windows line endings ---------------------------------------------------------__
+// __Git on Windows checks files out with CRLF, and CR LF is one written letter, so__
+// __a split on a newline never matches inside it. This fixture is committed with CRLF__
+// __on purpose (see .gitattributes). Its Tamil twin has one heading fewer, and that has__
+// __to be found whatever the line endings are.__
+
+குறை_ = இணை_சிக்கல்கள்(மாதிரி("crlf_structure"));
+ஓட்டம் = சமம்(ஓட்டம், நீளம்(குறை_), 1, "crlf_structure: one problem, even with Windows line endings");
+ஓட்டம் = உறுதிசெய்(ஓட்டம், குறை_உள்ளதா(குறை_, "headings differ, English 3, Tamil 2"),
+                  "crlf_structure: gives both counts");
 
 // __--- the repository itself ---------------------------------------------------------__
 
