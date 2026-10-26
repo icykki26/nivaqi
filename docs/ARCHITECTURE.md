@@ -165,6 +165,12 @@ comment".
 Measured per module and reported in its README. A breach is not blocked, but it
 is explained in that module's `DECISIONS.md`.
 
+**nivaqi contains no rule and no shared helper** ([decision 0017](DECISIONS/0017-where-code-lives.md)).
+The libraries are in other repositories, so what is left here is the application:
+routes, the mapping to the database, configuration, migrations, seed data and
+screens. If a rule or a helper that two modules use turns up here, that is the
+defect, and it moves to `nUlakam` or to eTamil-ciRal at once.
+
 ### 3.2 Detailed documentation
 
 `nUlakam` already holds the convention: **153 library modules, 23 `uqavi/`
@@ -176,34 +182,36 @@ profit; the fixed cost has not been met yet").
 nivaqi inherits that unchanged and adds a document set per module
 (section 11).
 
-### 3.3 Libraries under `nUlakam`
+### 3.3 Libraries: where they live
 
-Every module either adds a `nUlakam` family or extends one. Section 8 lists
-what each adds.
+Every module either adds an `nUlakam` family or extends one. Section 8 lists
+what each adds. Where code lives is decided in [0017](DECISIONS/0017-where-code-lives.md):
 
-**The cross-repository consequence.** nivaqi is `icykki26/nivaqi`; `nUlakam` is
-in `Maruff/eTamil_lang`. Module work therefore splits across two repositories
-on every feature:
+| Kind of code | Repository | Example |
+|---|---|---|
+| eTamil libraries: rules, the kernel, domain families | `nUlakam`, in `Maruff/eTamil_lang` | `nUlakam/carakku/*.qmz` |
+| JavaScript and TypeScript libraries: the form and list framework | `Maruff/eTamil-ciRal` | `ui/src/form/FormRenderer.tsx` |
+| The application built from them | `icykki26/nivaqi` | `carakku/carakku_kYyALi.qmz`, `mukappu/` |
 
-```
-eTamil_lang   nUlakam/carakku/*.qmz            the rules
-nivaqi        carakku/carakku_kYyALi.qmz       the routes
-```
+Module work therefore splits across up to three repositories on every feature.
 
 Policy:
 
-- The library change lands in `eTamil_lang` **first**, with its `uqavi/`
-  examples and `cOqaZY` tests, and is released.
-- nivaqi pins an eTamil version in `.env` and in CI, and bumps it
-  deliberately. It never tracks `main`.
-- For the inner loop, `ETAMIL_PATH` points at a local `eTamil_lang` checkout.
-  CI never does this — CI installs the pinned release, which is what catches
-  "it works here because my `nUlakam` is ahead".
-- A nivaqi PR needing an unreleased library function links the `eTamil_lang`
-  PR and does not merge first.
+- A library change lands in its own repository **first**, with its tests (and,
+  for `nUlakam`, its `uqavi/` examples), and is released.
+- nivaqi pins an eTamil release (`ETAMIL_VERSION`, in CI and `.env`) and depends on
+  eTamil-ciRal as a git dependency pinned to a commit, installed with pnpm
+  ([decision 0018](DECISIONS/0018-consuming-ciral.md)). It bumps each deliberately and never
+  tracks `main`.
+- For the inner loop, `ETAMIL_PATH` points at a local `eTamil_lang` checkout and
+  `pnpm link` at a local eTamil-ciRal checkout, never committed. CI never does
+  this — CI installs the pinned versions, which is what catches "it works here
+  because my library is ahead".
+- A nivaqi PR needing an unreleased library function links the library PR and
+  does not merge first.
 
 This is friction, and it is the correct friction: it is what stops nivaqi
-quietly growing a private copy of the standard library.
+quietly growing a private copy of a library.
 
 ---
 
@@ -354,27 +362,34 @@ value** — pass it the balance and the limit, not a connection.
 
 ```
 nivaqi/
-  README.md  AUTHORS  LICENSE
+  README.md  README.ta.md  AUTHORS  LICENSE
   docs/
     ARCHITECTURE.md          this document
     DECISIONS/               one numbered file per decision
+    CAPABILITIES.md          what is still to build in eTamil
     API.md                   generated route index across all modules
     DEPLOY.md
-  atiqqaLam/                 the kernel (6.3)
   payiRci/                   seeds and demo data per pilot
-  <module>/                  one directory per module
-    README.md
-    MODEL.md  API.md  RULES.md  LIBRARY.md  DECISIONS.md
-    <module>_amYppu.qmz      schema and migrations
-    <module>_kaLam.qmz       persistence
+  <module>/                  one directory per module: the application side only
+    README.md  README.ta.md  and the same pair for MODEL, API, RULES, LIBRARY, DECISIONS
+    <module>_amYppu.qmz      schema
+    <module>_kaLam.qmz       persistence mapping
     <module>_kYyALi.qmz      handlers
     <module>_cEvY.qmz        routes and workers
-    <module>_cOqaZY.qmz      tests
-    uqavi/                   runnable worked examples
-  mukappu/                   the React application
+    <module>_cOqaZY.qmz      tests of the routes against seeded data
+  mukappu/                   the React application, built from eTamil-ciRal
   itam/                      migrations, as numbered SQL
-  karuvi/                    eTamil programs: migrate, seed, export, check
+  karuvi/                    eTamil programs: migrate, seed, export, and the Tamil-twin
+                             check with its tests and fixtures (qamiz_iNY*.qmz)
   .github/workflows/
+```
+
+Not here, because they are libraries (decision 0017):
+
+```
+eTamil_lang/nUlakam/         the kernel atiqqaLam and every module's library family,
+                             with their uqavi/ examples and cOqaZY tests
+eTamil-ciRal/ui/             the JavaScript and TypeScript form and list framework
 ```
 
 **One process or several?** Start with one `--server` process mounting every
@@ -484,9 +499,11 @@ Nine rules, each cheap now and very expensive to retrofit.
 
 ### 6.6 The front end
 
-React 19 + Vite + TypeScript, Tailwind, over the JSON API — the pattern
-`eTamil_lang/docs/studio/MVP.md` already assumes for every eTamil demo
-application.
+React 19 + Next.js + TypeScript over the JSON API ([decision 0016](DECISIONS/0016-front-end.md)).
+The screens are drawn by the form and list framework in `Maruff/eTamil-ciRal`
+(`ui/`), whose CSS is plain, with the design tokens as variables, not Tailwind.
+`eTamil_lang/docs/studio/MVP.md` already assumes a React front end for every
+eTamil demo application.
 
 - **nginx or Caddy serves the build and proxies `/api`.** The eTamil server has
   no static file serving, and that is the wrong place for it.
@@ -745,6 +762,10 @@ A module is done when all nine exist. Not eight.
 | 8 | Seed data in `payiRci/` sufficient to demonstrate the module without typing |
 | 9 | An end-to-end worked script, in the shape of `aluvalakam.qmz`: the module's whole story as one runnable program |
 
+Deliverables 1 to 3 are libraries and live in `nUlakam`, in `eTamil_lang`. The rest
+live here, except that the React screens in 6 are built from the framework in
+eTamil-ciRal. Each document in 7 is written in English and in Tamil (section 11).
+
 Number 9 is worth defending. `aluvalakam.qmz` is the best documentation in the
 eTamil repository — executable, so it cannot go stale, and it demonstrates the
 libraries composing rather than each working alone.
@@ -786,6 +807,14 @@ Per module, seven files, each with one job:
 | `LIBRARY.md` | Which `nUlakam` families it uses, what it added, and what it deliberately did not add |
 | `DECISIONS.md` | Numbered: what was decided, what was rejected, why |
 | `uqavi/` | Runnable worked examples, one per public function |
+
+**Every one of these is written twice: `X.md` in English and `X.ta.md` in Tamil**,
+each linking to the other at the top ([decision 0017](DECISIONS/0017-where-code-lives.md)). Code
+comments follow the eTamil convention, English inside `__…__` and Tamil in plain
+text, and the interface is in both languages from the first screen. The Tamil is
+a first draft until a Tamil speaker has read it. `docs/` — this document, the decision
+records and the capability list — is English only, by decision. An automated check
+(`karuvi/qamiz_iNY_caripArppu.qmz`, run in CI) enforces the twins everywhere else.
 
 Two rules about prose, taken from the eTamil repository's own documentation:
 
@@ -881,9 +910,14 @@ Decisions taken after the founding ten:
 principles (section 1); [0013](DECISIONS/0013-edge-placement.md), the
 edge placement and local-first with a single authority (sections 6.3 and
 6.7); [0014](DECISIONS/0014-databases-and-language.md), the databases by
-placement and eTamil as the default backend language (section 6.1); and
+placement and eTamil as the default backend language (section 6.1);
 [0015](DECISIONS/0015-money-as-integer-minor-units.md), stored money as
-integer minor units (section 6.4).
+integer minor units (section 6.4);
+[0016](DECISIONS/0016-front-end.md), the front end and where its framework lives
+(section 6.6);
+[0017](DECISIONS/0017-where-code-lives.md), where code lives and the language of the
+documentation (sections 3.3, 6.2 and 11); and [0018](DECISIONS/0018-consuming-ciral.md), how nivaqi
+consumes eTamil-ciRal (section 3.3).
 
 ### Licence
 
@@ -926,6 +960,12 @@ nothing in this repository changes it.
 
 ## 15. Where to start
 
+**The initial phase is the spike, M0, M1, M2 and the review gate.** M0 (the
+kernel), M1 (identity), M2 (Partners) and the gate are 6–8, 3–4, 4–5 and 1
+weeks in section 12, so **14–18 weeks** in all. That is the plan's estimate and
+is unmeasured. The spike and the conversations with the pilots come on top of
+it.
+
 1. **Run the performance spike** (risks, row 4). A few days. It is the only
    thing that could invalidate the architecture, and it is cheap to find out
    now. Decision 0011 adds to it: requests per second per core with
@@ -943,8 +983,16 @@ nothing in this repository changes it.
 3. Set up CI, migrations, the React shell and deployment. Deploy an empty
    application that can sign nobody in.
 4. Write `atiqqaLam/` — all eleven modules, with `uqavi/` examples and tests.
-5. Write Partners on top of it, all nine deliverables, and *use* it.
-6. Hold the review gate honestly. If the kernel is wrong, it is wrong now and
+5. Write M1, identity (`atYyALam/`): sign-in, sessions, roles and permissions
+   through `aZumaqi`, record rules, and the rest of section 8.2's M1 row.
+   Partners needs an authenticated user and a permission check, so it cannot
+   start before this. *Not decided:* a thin slice (sign-in, a session, and
+   roles through `aZumaqi`) is enough for Partners to start, and the remainder
+   of M1 could follow the review gate. The plan's default is the whole of M1
+   first.
+6. Write Partners on top of the kernel and identity, all nine deliverables, and
+   *use* it.
+7. Hold the review gate honestly. If the kernel is wrong, it is wrong now and
    cheap.
 
 Wave 1's remaining modules are then a repeating exercise rather than a series

@@ -53,6 +53,8 @@ concurrent-terminal behaviour in item 5.
 | 11 | **Streaming or cursor reads, and line-by-line file reading** | ~ The README says rows return as an array of records, and I found no cursor API. I did not enumerate the file-read builtins | Exporting and importing large tenants | P1 |
 | 12 | **Time-of-day scheduling.** `இடைவெளி N` runs on an interval only | ✔ README. `examples/katY/katY_cEvY.qmz` says a real shop would want its job nightly | Nightly jobs and payroll runs. Workaround: an interval plus a clock check | P3 |
 | 13 | **A decimal aggregate in the SQLite driver** | ✔ `Cargo.toml` enables rusqlite's `functions` feature, and `db/sqlite.rs` registers scalar functions only | Fallback only. [0015](DECISIONS/0015-money-as-integer-minor-units.md) makes it unnecessary for money | P3 |
+| 24 | **Static file serving in the eTamil server** | ✔ I searched `etamil_compiler/src/http/` for static file serving and found none; ARCHITECTURE §5.1 records the gap | A static Next.js export served by the one eTamil binary on an edge machine, with no reverse proxy to install ([0016](DECISIONS/0016-front-end.md)) | P2 |
+| 25 | **Create a directory** | ✔ I searched the interpreter's file builtins: `கோப்பகம்_படி` reads a directory and nothing makes one. Found while writing the Tamil-twin tests, which therefore use committed fixture folders | Tests and tools that need a temporary folder | P3 |
 
 ## Libraries (`nUlakam`, written in eTamil)
 
@@ -68,6 +70,7 @@ concurrent-terminal behaviour in item 5.
 | 21 | **Updater:** download, verify, swap. Replacing a running binary may need host support | ✔ I found no updater in the compiler source, packaging, the install script or the command reference | The edge placement. Not designed or estimated | P2 |
 | 22 | **Quantities as integers in a unit category's reference unit** | Open in [0015](DECISIONS/0015-money-as-integer-minor-units.md) | The inventory schema | P2 |
 | 23 | **Port `check_names.py` to eTamil** | ✔ 144 lines of Python in `eTamil_lang`; nivaqi's CI runs it | [0014](DECISIONS/0014-databases-and-language.md) policy. Not decided | P3 |
+| 26 | **A directory walk that can skip folders** | ✔ `kOppumuRY/கோப்பக_நட` enters every folder and has no way to prune, so a `node_modules` or `.git` is walked in full. The Tamil-twin check has its own walk for that reason | Any tool run over a repository | P3 |
 
 ## Checked, and not a gap
 

@@ -51,7 +51,7 @@ Recorded exceptions:
 
 | Exception | Why |
 |---|---|
-| The React, Vite and TypeScript front end, and its UI tests | Rendering in a browser. The owner's own example |
+| The React, Next.js and TypeScript front end, and its UI tests | Rendering in a browser. The owner's own example. The framework is in eTamil-ciRal ([0016](0016-front-end.md)) |
 | SQLite and PostgreSQL | Storage engines. Durability, indexes, a planner, concurrency and recovery are the huge case, and file locking and fsync are Layer 0 |
 | PgBouncer, a reverse proxy, Redis, LibreOffice (PDF conversion, through `கட்டளை_ஓட்டு`) | Infrastructure products nivaqi uses and does not write |
 

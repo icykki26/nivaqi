@@ -24,8 +24,11 @@ beside its decisions for the same reason.
 | [0013](0013-edge-placement.md) | Edge placement — local-first with a single authority | accepted, amended by 0014; **costs and capacities unmeasured** |
 | [0014](0014-databases-and-language.md) | Databases by placement, and eTamil as the default backend language | accepted; **exceptions are recorded** |
 | [0015](0015-money-as-integer-minor-units.md) | Stored money is an integer count of the minor unit, on both engines | accepted; **quantities still open** |
+| [0016](0016-front-end.md) | The front end: Next.js, with the framework in eTamil-ciRal | accepted |
+| [0017](0017-where-code-lives.md) | Where code lives, and the language of the documentation | accepted; **the owner's review of the Tamil is pending** |
+| [0018](0018-consuming-ciral.md) | How nivaqi consumes eTamil-ciRal: a pinned git dependency | accepted; **not yet tried** |
 
-## The six that still want attention
+## The nine that still want attention
 
 **0008** notes that dual-licensing `nUlakam` is the owner's to do only while
 there are no external contributors. That window closes on the first
@@ -49,6 +52,17 @@ composite keys), and which development tools to port.
 **0015** leaves quantities open. They have the same sorting and summing problem
 as money, and must be settled before the inventory schema. It also leaves the
 minor-unit exponent per currency and the column naming convention.
+
+**0016** leaves eTamil-ciRal's licence file and copyright line, and whether to keep
+its history.
+
+**0017** leaves the owner's review of the Tamil text, and the twin check has not yet
+run in CI.
+
+**0018** has not been tried: no install has been run, and eTamil-ciRal has nothing
+pushed to pin yet. The first install confirms the exact specifier, the Next.js
+setting for a package that ships TypeScript, and the TypeScript setting for `.ts`
+imports.
 
 ## Writing a new one
 
