@@ -1,0 +1,90 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Copyright (C) 2026 Isha Maruff and Esan Maruff
+// __karuvi/qamiz_iNY_cOqaZY.qmz — tests for the Tamil-twin check__
+// தமிழ் இணைச் சரிபார்ப்புக்கான சோதனைகள்
+//
+//   __etamil --vm karuvi/qamiz_iNY_cOqaZY.qmz__
+//
+// __Run from the repository root: the fixtures are found relative to it. Each__
+// __folder in karuvi/fixtures/qamiz_iNY is a tiny repository that breaks one rule.__
+// __Exits non-zero if anything fails.__
+
+இறக்கு "nUlakam/cOqaZY/cOqaZY.qmz";
+இறக்கு "qamiz_iNY.qmz";
+
+செயல் மாதிரி(பெயர்_) { திரும்பு "karuvi/fixtures/qamiz_iNY/" & பெயர்_; }
+
+// __குறை_உள்ளதா(சிக்கல்_, துண்டு_) — does any problem mention this?__
+// குறை_உள்ளதா(சிக்கல்_, துண்டு_) — எந்தக் குறையிலாவது இது உள்ளதா
+செயல் குறை_உள்ளதா(சிக்கல்_, துண்டு_) {
+    ஒவ்வொரு ஒன்று_ இல் சிக்கல்_ {
+        (கொண்டுள்ளதா(ஒன்று_, துண்டு_)) எனில் { திரும்பு மெய்; }
+    }
+    திரும்பு பொய்;
+}
+
+ஓட்டம் = சோதனை_தொடக்கம்("தமிழ் இணை (Tamil twin check)");
+
+// __--- counting structure -----------------------------------------------------__
+// __A # inside a code fence is code, so it is not a heading.__
+
+உரை_ = "# a\n## b\n```\n# not a heading\n```\n| x | y |\n|---|---|\n| 1 | 2 |\n";
+ஓட்டம் = சமம்(ஓட்டம், அமைப்பு_எண்ணிக்கை(உரை_), [2, 3, 2],
+              "headings, table rows, fences: a # inside a fence is not counted");
+ஓட்டம் = சமம்(ஓட்டம், அமைப்பு_எண்ணிக்கை(""), [0, 0, 0], "an empty file has no structure");
+
+// __--- counting Tamil words ----------------------------------------------------__
+
+ஓட்டம் = சமம்(ஓட்டம், தமிழ்ச்_சொற்கள்("இது ஒரு test of தமிழ்"), 3, "words that begin with a Tamil letter");
+ஓட்டம் = சமம்(ஓட்டம், தமிழ்ச்_சொற்கள்("இது\nஒரு"), 2, "a line break separates words");
+ஓட்டம் = சமம்(ஓட்டம், தமிழ்ச்_சொற்கள்("only English words here"), 0, "English is not Tamil");
+ஓட்டம் = சமம்(ஓட்டம், தமிழ்ச்_சொற்கள்("[தமிழ்](README.ta.md)"), 0, "a word that begins with punctuation is not counted");
+
+// __--- the link must be near the top --------------------------------------------__
+
+ஓட்டம் = உறுதிசெய்(ஓட்டம், மேலே_உள்ளதா("a\nb\nsee README.ta.md\n", "README.ta.md"), "a link on line 3 counts");
+தொலைவு_ = "";
+இ_ = 0;
+(இ_ < 14) சுற்று { தொலைவு_ = தொலைவு_ & "x\n"; இ_ = இ_ + 1; }
+ஓட்டம் = உறுதிசெய்(ஓட்டம், இல்லை மேலே_உள்ளதா(தொலைவு_ & "README.ta.md\n", "README.ta.md"),
+                  "a link on line 15 is too far down");
+
+// __--- which documents are found ---------------------------------------------------__
+// __The ok fixture also holds docs/ARCHITECTURE.md and a node_modules README. Neither__
+// __is listed: docs/ is English only by decision, and node_modules is not ours.__
+
+ஓட்டம் = சமம்(ஓட்டம், ஆவணங்கள்_தேடு(மாதிரி("ok")),
+              ["README.md", "README.ta.md", "carakku/README.md", "carakku/README.ta.md"],
+              "the documents found, below the top level too, without docs/ or node_modules");
+
+// __--- whole fixtures --------------------------------------------------------------__
+
+நல்லது_ = இணை_சிக்கல்கள்(மாதிரி("ok"));
+ஓட்டம் = உறுதிசெய்(ஓட்டம், நீளம்(நல்லது_) == 0, "ok: no problems, got: " & ஒன்றிணை(நல்லது_, "; "));
+
+குறை_ = இணை_சிக்கல்கள்(மாதிரி("missing_twin"));
+ஓட்டம் = சமம்(ஓட்டம், நீளம்(குறை_), 1, "missing_twin: one problem");
+ஓட்டம் = உறுதிசெய்(ஓட்டம், குறை_உள்ளதா(குறை_, "no Tamil twin README.ta.md"), "missing_twin: says the twin is missing");
+
+குறை_ = இணை_சிக்கல்கள்(மாதிரி("orphan_tamil"));
+ஓட்டம் = சமம்(ஓட்டம், நீளம்(குறை_), 1, "orphan_tamil: one problem");
+ஓட்டம் = உறுதிசெய்(ஓட்டம், குறை_உள்ளதா(குறை_, "no English file README.md"), "orphan_tamil: says the English file is missing");
+
+குறை_ = இணை_சிக்கல்கள்(மாதிரி("no_link"));
+ஓட்டம் = சமம்(ஓட்டம், நீளம்(குறை_), 1, "no_link: one problem");
+ஓட்டம் = உறுதிசெய்(ஓட்டம், குறை_உள்ளதா(குறை_, "README.ta.md: does not link to README.md"), "no_link: names the file that lacks the link");
+
+குறை_ = இணை_சிக்கல்கள்(மாதிரி("structure"));
+ஓட்டம் = சமம்(ஓட்டம், நீளம்(குறை_), 1, "structure: one problem");
+ஓட்டம் = உறுதிசெய்(ஓட்டம், குறை_உள்ளதா(குறை_, "headings differ, English 3, Tamil 2"), "structure: gives both counts");
+
+குறை_ = இணை_சிக்கல்கள்(மாதிரி("not_tamil"));
+ஓட்டம் = சமம்(ஓட்டம், நீளம்(குறை_), 1, "not_tamil: one problem");
+ஓட்டம் = உறுதிசெய்(ஓட்டம், குறை_உள்ளதா(குறை_, "Tamil words"), "not_tamil: says there are too few Tamil words");
+
+// __--- the repository itself ---------------------------------------------------------__
+
+உண்மை_ = இணை_சிக்கல்கள்(".");
+ஓட்டம் = உறுதிசெய்(ஓட்டம், நீளம்(உண்மை_) == 0, "this repository: no problems, got: " & ஒன்றிணை(உண்மை_, "; "));
+
+சோதனை_முடிவு(ஓட்டம்);

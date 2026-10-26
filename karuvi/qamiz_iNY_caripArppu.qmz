@@ -1,0 +1,26 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Copyright (C) 2026 Isha Maruff and Esan Maruff
+// __karuvi/qamiz_iNY_caripArppu.qmz — the Tamil-twin check, as a command__
+// தமிழ் இணைச் சரிபார்ப்பு — கட்டளையாக
+//
+//   __etamil --vm karuvi/qamiz_iNY_caripArppu.qmz__
+//
+// __Run from the repository root. NIVAQI_ROOT names another folder to check. Exits__
+// __non-zero when anything is wrong, so it works as a CI step and a git hook.__
+
+இறக்கு "qamiz_iNY.qmz";
+
+வேர் = சூழல்("NIVAQI_ROOT", ".");
+ஆவணங்கள் = ஆவணங்கள்_தேடு(வேர்);
+சிக்கல்கள் = இணை_சிக்கல்கள்(வேர்);
+
+(நீளம்(சிக்கல்கள்) == 0) எனில் {
+    அச்சு "✓ " & நீளம்(ஆவணங்கள்) & " documents checked, every one has its Tamil twin  (தமிழ் இணை உள்ளது)";
+}
+இன்றேல் {
+    ஒவ்வொரு ஒன்று இல் சிக்கல்கள் {
+        அச்சு "✗ " & ஒன்று;
+    }
+    அச்சு நீளம்(சிக்கல்கள்) & " problem(s) in " & நீளம்(ஆவணங்கள்) & " documents";
+    வெளியேறு(1);
+}

@@ -1,0 +1,41 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Copyright (C) 2026 Isha Maruff and Esan Maruff
+#
+# Every document outside docs/ has its Tamil twin (decision 0017). The check is an
+# eTamil program, so it runs on a pinned eTamil release, verified against the
+# checksum published beside it.
+
+name: docs-twin
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+env:
+  ETAMIL_VERSION: v1.4.2
+
+jobs:
+  twin:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install eTamil ${{ env.ETAMIL_VERSION }}
+        run: |
+          base="https://github.com/Maruff/eTamil_lang/releases/download/${ETAMIL_VERSION}"
+          curl -fsSLO "${base}/etamil-linux-x64.tar.gz"
+          curl -fsSLO "${base}/etamil-linux-x64.tar.gz.sha256"
+          sha256sum -c etamil-linux-x64.tar.gz.sha256
+          tar -xzf etamil-linux-x64.tar.gz
+          echo "ETAMIL_PATH=${PWD}/etamil-linux-x64" >> "${GITHUB_ENV}"
+          echo "${PWD}/etamil-linux-x64" >> "${GITHUB_PATH}"
+
+      - name: Test the check
+        run: etamil --vm karuvi/qamiz_iNY_cOqaZY.qmz
+
+      - name: Check the documents
+        run: etamil --vm karuvi/qamiz_iNY_caripArppu.qmz
