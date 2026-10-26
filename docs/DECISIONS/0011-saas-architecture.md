@@ -97,9 +97,8 @@ connection.
 - UUIDv7 generation (below) and how fast the export tool runs when written
   in eTamil (0014).
 - A static Linux build, which is what would be deployed.
-- **SQLite money sums.** `SUM` over a money column returned a float that
-  differed from the exact decimal sum in 44 of 1,500 small-ledger trials
-  (0013). Not yet tested through eTamil's driver or its bundled SQLite.
+- **Integer money through the driver.** Stored money is integer minor units
+  (0015); the check is that it round-trips as `INTEGER` and sums exactly.
 - **Concurrent terminals** writing to one SQLite file through one eTamil
   process (0013).
 
@@ -123,7 +122,7 @@ so it walks the tables in foreign-key order and copies `WHERE tenant = X`. One
 tool serves four needs: per-tenant restore, a nightly per-tenant backup, the
 customer's own data export (the tenant lifecycle needs one), and moving a tenant
 from the pooled tier to its own database. It is an eTamil program in `karuvi/`, exchanging
-files between engines (decision 0014); backend code is eTamil only.
+files between engines (decision 0014); backend code is eTamil by default.
 
 **Rolling a tenant back is not safe for a ledger.** Some things have already
 left the system and cannot be unsent: e-invoice IRNs, e-way bills, UPI payments,

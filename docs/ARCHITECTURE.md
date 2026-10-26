@@ -335,13 +335,14 @@ acquires a report becomes a column in the next migration.
 | 3 — Application | **eTamil** (`nivaqi`) | Routes, persistence mapping, orchestration, response shaping |
 | 4 — Interface | TypeScript / React | Presentation only. No rules |
 
-**The backend is eTamil only** (decision 0014): every server-side and
+**The backend is eTamil by default** (decision 0014): every server-side and
 operational program nivaqi authors, including migrations, seeds, sync, the
-tenant export tool and the tests. The React front end and infrastructure
-products such as PostgreSQL, PgBouncer and a reverse proxy are outside the
-rule. When eTamil cannot do something, the answer is a change to eTamil in
-`eTamil_lang`, not a script in another language. The databases are SQLite on
-the edge and PostgreSQL in the cloud.
+tenant export tool and the tests. When eTamil has a gap, the gap is filled by
+building the capability into eTamil in `eTamil_lang`; another language is
+chosen only when that would be huge or complicated, and each exception is
+recorded in 0014. The recorded exceptions are the React front end, SQLite and
+PostgreSQL, and infrastructure products such as PgBouncer and a reverse
+proxy. The databases are SQLite on the edge and PostgreSQL in the cloud.
 
 The applied test transfers from `eTamil_lang/docs/ARCHITECTURE.md`: rounding
 went into the host because it needs the decimal representation; Indian digit
@@ -441,15 +442,18 @@ Nine rules, each cheap now and very expensive to retrofit.
    A deleted customer with three years of invoices is a corrupted ledger.
 5. **Every row carries tenant, company, created-by/at and modified-by/at.**
    Written by the kernel, never by modules.
-6. **Money is `NUMERIC` in PostgreSQL**, never `REAL`, never a float anywhere
-   on the path. Under SQLite it crosses as text, which round-trips losslessly.
-   This is already how the drivers behave; the rule is not to defeat it.
-   **Aggregation is the exception:** summing a text money column in SQLite
-   returns a float, which differed from the exact decimal sum in a test
-   (decision 0013). Sum money in integer paise or in eTamil on any engine
-   on the edge. SQLite is the edge database
-   (decision 0014), so the money representation must be decided before the
-   first schema (decision 0013); this rule is not changed until then.
+6. **Money is an integer count of the currency's minor unit** — `BIGINT` on
+   PostgreSQL, `INTEGER` on SQLite — never `NUMERIC`, never text, never a
+   float (decision 0015). One representation on both engines, so sums,
+   ordering, comparison, `MAX` and indexes are exact and correct everywhere,
+   and a tenant's data moves between engines unchanged. A text money column
+   sorts and compares wrongly in SQLite, which is why the earlier rule, text
+   on SQLite and `NUMERIC` on PostgreSQL, was replaced. In memory the ledger
+   still works in exact decimals; the conversion happens once, in the
+   persistence layer, and refuses an amount with more precision than the
+   currency's minor unit instead of rounding it. Rates, which are never summed
+   or ordered in SQL, stay exact decimal text. Quantities have the same
+   problem and are open (0015).
 7. **Document state is data, not code.** Use `qittam/nilYmARRam` — a lifecycle
    as a transition table — for draft → confirmed → done → cancelled on every
    document type. Transitions are then inspectable, testable and renderable,
@@ -695,8 +699,8 @@ collision, names are governed from the first function:
   documented as private by convention. The language cannot enforce it; review
   can.
 - **`scripts/check_names.py` runs in CI** on every library PR, against every
-  name already in `nUlakam`. It is a Python tool in `eTamil_lang`; whether the
-  eTamil-only rule extends to development tooling is open (decision 0014).
+  name already in `nUlakam`. It is a Python tool of 144 lines in `eTamil_lang`, a candidate to port to
+  eTamil under decision 0014's policy; not decided.
 - **No name may be a hard-reserved word** (section 4.4). Financial keywords are
   free — `தொகை` is a good name for an amount.
 
@@ -876,8 +880,10 @@ Decisions taken after the founding ten:
 (section 6.7); [0012](DECISIONS/0012-product-principles.md), product
 principles (section 1); [0013](DECISIONS/0013-edge-placement.md), the
 edge placement and local-first with a single authority (sections 6.3 and
-6.7); and [0014](DECISIONS/0014-databases-and-language.md), the databases by
-placement and eTamil as the only backend language (section 6.1).
+6.7); [0014](DECISIONS/0014-databases-and-language.md), the databases by
+placement and eTamil as the default backend language (section 6.1); and
+[0015](DECISIONS/0015-money-as-integer-minor-units.md), stored money as
+integer minor units (section 6.4).
 
 ### Licence
 
@@ -926,12 +932,10 @@ nothing in this repository changes it.
    PostgreSQL under a real handler; memory under load with the full import
    set; row-level security through the driver with `SET LOCAL` under
    PgBouncer transaction pooling; how UUIDv7 is generated; and whether
-   bulk copy is available for the tenant export tool. Decision 0013 adds two
-   more: whether `SUM` over a money column through eTamil's driver and its
-   bundled SQLite is exact (a Python test showed a float that differed from
-   the exact decimal sum in 44 of 1,500 small-ledger trials), and what
+   bulk copy is available for the tenant export tool. Decision 0013 adds what
    happens with several terminals writing to one SQLite file through one
-   eTamil process. Decision 0014 adds two more: how fast the tenant export
+   eTamil process. Decision 0015 adds whether integer money round-trips
+   through eTamil's driver as `INTEGER` and sums exactly on both engines. Decision 0014 adds two more: how fast the tenant export
    runs when written in eTamil, and whether eTamil can generate UUIDv7 (it has
    a seconds clock, and no general UUID or random builtin was found).
 2. **Confirm the four pilots' real requirements** (section 2). A conversation

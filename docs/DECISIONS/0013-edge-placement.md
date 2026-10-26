@@ -2,7 +2,8 @@
 
 **Status:** accepted, 2026-10-26, recorded on the owner's instruction.
 Amends [0011](0011-saas-architecture.md) by adding a third placement; the edge
-database is settled by [0014](0014-databases-and-language.md). **Costs
+database is settled by [0014](0014-databases-and-language.md) and the money
+representation by [0015](0015-money-as-integer-minor-units.md). **Costs
 and capacities here are estimates or unmeasured**, and are marked as such.
 
 ## Context
@@ -84,7 +85,7 @@ a request. Anything that must reach the cloud goes through the outbox.
 ### SQLite and money
 
 The ledger's balance check is an equality between two sums of money. SQLite
-stores decimals as text in this design (ARCHITECTURE section 6.4, rule 6), so I
+stores decimals as text in this design (the earlier ARCHITECTURE section 6.4, rule 6, since replaced), so I
 tested what `SUM` returns, in SQLite 3.50.4 through Python, over random
 two-decimal amounts. Each trial summed the same amounts in two different orders:
 
@@ -110,11 +111,22 @@ aggregate in eTamil, and never `SUM` a text column. Rates and quantities need
 more than two decimals and stay exact decimals, with arithmetic in eTamil only.
 Rule 6 in ARCHITECTURE section 6.4 is **not changed** until this is decided.
 
+**Correction, 2026-10-26.** This section tested only `SUM`, and the problem is
+wider: SQLite compares text lexicographically, so a text money column also
+sorts, compares and takes `MAX` wrongly. On the amounts 9.50, 10.00, 100.00
+and 2.25, `MAX` returned 9.50. The statement above that integer paise "were
+exact throughout" overclaims: the test checked that debits equalled credits,
+and integer addition is exact by construction, but it did not compare against
+an exact decimal sum. The recommendation is now a decision, in
+[0015](0015-money-as-integer-minor-units.md), and rule 6 has been replaced.
+
 ## Not measured
 
 - **Concurrent writers.** Several terminals writing through one eTamil process
   to one SQLite file, and whether `database is locked` errors appear.
-- **The SQLite version bundled with eTamil**, and `SUM` through its driver.
+- **Integer money through eTamil's driver** (0015): stored as `INTEGER`, and
+  `SUM` exact. The bundled SQLite is rusqlite 0.32's; I did not check its
+  version.
 - **The sync protocol**, which does not exist yet beyond the PoS outbox pattern.
 - **Backup size** per customer, and the **free-tier cloud cost** (backup
   storage, update hosting, sync relay, licensing). No figure is given.
@@ -157,8 +169,7 @@ These join the M0 spike (ARCHITECTURE section 15).
 ## Open
 
 - **The edge database:** settled as SQLite in [0014](0014-databases-and-language.md).
-- **Money representation.** SQLite is the edge database, so this must be
-  decided before the first schema (above).
+- **Money representation:** settled in [0015](0015-money-as-integer-minor-units.md).
 - **What "free" means:** limits on users, documents and storage. A business
   decision for the owner.
 - **The updater's design,** and which hardware is supported (PC, Raspberry Pi,

@@ -18,6 +18,7 @@ architecture and the ten decisions it rests on. Code starts with the kernel.
 |---|---|
 | Architecture | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) |
 | Decisions | [docs/DECISIONS/](docs/DECISIONS/) |
+| Capabilities to build in eTamil | [docs/CAPABILITIES.md](docs/CAPABILITIES.md) |
 | Language and libraries | [Maruff/eTamil_lang](https://github.com/Maruff/eTamil_lang) — eTamil 1.4.2 |
 
 ## The idea
@@ -60,7 +61,7 @@ nivaqi.
 | Routes, persistence, orchestration | **eTamil**, here |
 | Interface | React + Vite + TypeScript, presentation only |
 | Database | PostgreSQL in the cloud; SQLite on the edge and in the PoS |
-| Backend language | **eTamil only** — no other ([decision 0014](docs/DECISIONS/0014-databases-and-language.md)) |
+| Backend language | **eTamil by default**; exceptions are recorded ([decision 0014](docs/DECISIONS/0014-databases-and-language.md)) |
 | Point of sale | A separate eTamil process on Android, offline-first, over local SQLite |
 
 ## Licence and authorship

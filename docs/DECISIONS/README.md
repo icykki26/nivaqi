@@ -22,9 +22,10 @@ beside its decisions for the same reason.
 | [0011](0011-saas-architecture.md) | SaaS architecture — shared schema, entitlements, pools, silos, and backup | accepted, amended by 0013; **estimates and unmeasured items marked** |
 | [0012](0012-product-principles.md) | Product principles — modular like Odoo, simple like Sage 50 | accepted in direction; **targets are proposals** |
 | [0013](0013-edge-placement.md) | Edge placement — local-first with a single authority | accepted, amended by 0014; **costs and capacities unmeasured** |
-| [0014](0014-databases-and-language.md) | Databases by placement, and eTamil as the only backend language | accepted; **one reading to confirm** |
+| [0014](0014-databases-and-language.md) | Databases by placement, and eTamil as the default backend language | accepted; **exceptions are recorded** |
+| [0015](0015-money-as-integer-minor-units.md) | Stored money is an integer count of the minor unit, on both engines | accepted; **quantities still open** |
 
-## The five that still want attention
+## The six that still want attention
 
 **0008** notes that dual-licensing `nUlakam` is the owner's to do only while
 there are no external contributors. That window closes on the first
@@ -38,13 +39,16 @@ claim is made until they are.
 **0012** carries three numeric targets that are proposals only. The owner sets
 the numbers.
 
-**0013** leaves the money representation open, and its biggest cost, running a fleet of customer-hosted
-instances with no updater, is not estimated.
+**0013**'s biggest cost, running a fleet of customer-hosted instances with no
+updater, is not estimated.
 
-**0014** reads "backend" as all server-side and operational code, with the
-front end and infrastructure products outside the rule. It also leaves the
-money representation (now forced, since SQLite is the edge database), how
-UUIDv7 is generated, and whether the rule extends to development tooling.
+**0014** fixes the policy, eTamil by default with exceptions recorded, and
+leaves two things: how UUIDv7 is generated (a builtin to add to eTamil, or
+composite keys), and which development tools to port.
+
+**0015** leaves quantities open. They have the same sorting and summing problem
+as money, and must be settled before the inventory schema. It also leaves the
+minor-unit exponent per currency and the column naming convention.
 
 ## Writing a new one
 
